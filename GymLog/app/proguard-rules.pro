@@ -1,0 +1,2 @@
+-keep class com.gymlog.app.** { *; }
+-keep class com.google.gson.** { *; }

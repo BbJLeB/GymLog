@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0A0A0F">
+
+    <!-- MAIN CONTENT -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- HEADER -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:background="#0A0A0F">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="GYMLOG"
+                android:textColor="#E8FF47"
+                android:textSize="32sp"
+                android:fontFamily="sans-serif-condensed"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#6B6B85"
+                android:textSize="12sp"
+                android:background="#1A1A26"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="6dp"/>
+        </LinearLayout>
+
+        <!-- TABS -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:paddingBottom="8dp">
+
+            <LinearLayout android:id="@+id/tabToday"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical"
+                android:gravity="center" android:padding="8dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="🏋️" android:textSize="20sp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="ДНЕС" android:textColor="#E8FF47" android:textSize="9sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/tabHistory"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical"
+                android:gravity="center" android:padding="8dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="📅" android:textSize="20sp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="ИСТОРИЯ" android:textColor="#9999BB" android:textSize="9sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/tabStats"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical"
+                android:gravity="center" android:padding="8dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="📊" android:textSize="20sp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="СТАТ." android:textColor="#9999BB" android:textSize="9sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/tabSettings"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical"
+                android:gravity="center" android:padding="8dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="⚙️" android:textSize="20sp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="НАСТР." android:textColor="#9999BB" android:textSize="9sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1A1A26"/>
+
+        <!-- VIEW TODAY -->
+        <ScrollView android:id="@+id/viewToday"
+            android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:padding="16dp"
+            android:clipToPadding="false" android:paddingBottom="110dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Add exercise -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:background="#12121A"
+                    android:padding="12dp" android:layout_marginBottom="16dp">
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <EditText android:id="@+id/etNewExercise"
+                            android:layout_width="0dp" android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:hint="Добави упражнение..."
+                            android:textColorHint="#6B6B85"
+                            android:textColor="#F0F0F5"
+                            android:background="#1A1A26"
+                            android:paddingHorizontal="14dp"
+                            android:imeOptions="actionDone"
+                            android:inputType="text"/>
+                        <Button android:id="@+id/btnAdd"
+                            android:layout_width="wrap_content" android:layout_height="48dp"
+                            android:text="ДОБАВИ"
+                            android:textColor="#000000"
+                            android:backgroundTint="#E8FF47"
+                            android:layout_marginStart="8dp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/llSuggestions"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:layout_marginTop="8dp"/>
+                </LinearLayout>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="ТРЕНИРОВКА" android:textColor="#6B6B85"
+                    android:textSize="14sp" android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView android:id="@+id/tvEmptyToday"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="🏋️\n\nНямаш упражнения\nДобави упражнение горе, за да започнеш"
+                    android:textColor="#6B6B85" android:textSize="14sp"
+                    android:gravity="center" android:padding="40dp"
+                    android:visibility="gone"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvExercises"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"/>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- VIEW HISTORY -->
+        <ScrollView android:id="@+id/viewHistory"
+            android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:padding="16dp" android:visibility="gone">
+            <LinearLayout android:id="@+id/llHistory"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+        </ScrollView>
+
+        <!-- VIEW STATS -->
+        <ScrollView android:id="@+id/viewStats"
+            android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:padding="16dp" android:visibility="gone">
+            <LinearLayout android:id="@+id/llStats"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+        </ScrollView>
+
+        <!-- VIEW SETTINGS -->
+        <ScrollView android:id="@+id/viewSettings"
+            android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:padding="16dp" android:visibility="gone">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="НАСТРОЙКИ" android:textColor="#6B6B85"
+                    android:textSize="14sp" android:textStyle="bold" android:layout_marginBottom="16dp"/>
+
+                <!-- Rest toggle -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:paddingVertical="12dp">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Почивка след серия" android:textColor="#F0F0F5" android:textSize="15sp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Таймер след всяка серия" android:textColor="#6B6B85" android:textSize="12sp"/>
+                    </LinearLayout>
+                    <Switch android:id="@+id/swRest"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:checked="true"/>
+                </LinearLayout>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Продължителност" android:textColor="#6B6B85"
+                    android:textSize="12sp" android:layout_marginBottom="8dp"/>
+
+                <RadioGroup android:id="@+id/rgRestTime"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <RadioButton android:id="@+id/rb30" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:text="30с" android:textColor="#F0F0F5"/>
+                    <RadioButton android:id="@+id/rb60" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:text="1 мин" android:textColor="#F0F0F5"/>
+                    <RadioButton android:id="@+id/rb90" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:text="1:30" android:textColor="#F0F0F5" android:checked="true"/>
+                    <RadioButton android:id="@+id/rb120" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:text="2 мин" android:textColor="#F0F0F5"/>
+                </RadioGroup>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="#1A1A26" android:layout_marginVertical="16dp"/>
+
+                <Button android:id="@+id/btnClearToday"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Изтрий днешната тренировка"
+                    android:backgroundTint="#1A1A26"
+                    android:textColor="#FF4757"
+                    android:layout_marginBottom="8dp"/>
+
+                <Button android:id="@+id/btnClearAll"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Изтрий цялата история"
+                    android:backgroundTint="#1A1A26"
+                    android:textColor="#FF4757"/>
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+    <!-- REST BAR -->
+    <LinearLayout
+        android:id="@+id/restBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="#FF8C00"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="14dp"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/progressRest"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="8dp"
+            android:layout_weight="1"
+            android:progressTint="#000000"
+            android:progressBackgroundTint="#55000000"
+            android:layout_marginEnd="12dp"/>
+
+        <TextView
+            android:id="@+id/tvRestCountdown"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="90"
+            android:textColor="#000000"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:gravity="center"/>
+
+        <Button
+            android:id="@+id/btnSkipRest"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="ПРОПУСНИ"
+            android:textSize="11sp"
+            android:backgroundTint="#33000000"
+            android:textColor="#000000"
+            android:layout_marginStart="12dp"/>
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
