@@ -1,0 +1,18 @@
+# Gradle / Android Studio
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Ключове за подписване: никога в репото
+*.jks
+*.keystore
+keystore.properties
+
+# ОС
+.DS_Store
+Thumbs.db
