@@ -140,6 +140,27 @@
                         android:orientation="horizontal" android:layout_marginTop="8dp"/>
                 </LinearLayout>
 
+                <!-- Шаблони: зареждане и запазване на тренировка -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginBottom="16dp">
+                    <Button android:id="@+id/btnTemplates"
+                        android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="📂 ШАБЛОНИ"
+                        android:textSize="12sp" android:maxLines="1"
+                        android:textColor="#E8FF47"
+                        android:backgroundTint="#1A1A26"
+                        android:layout_marginEnd="6dp"/>
+                    <Button android:id="@+id/btnSaveTemplate"
+                        android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="💾 ЗАПАЗИ"
+                        android:textSize="12sp" android:maxLines="1"
+                        android:textColor="#E8FF47"
+                        android:backgroundTint="#1A1A26"
+                        android:layout_marginStart="6dp"/>
+                </LinearLayout>
+
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="ТРЕНИРОВКА" android:textColor="#6B6B85"
                     android:textSize="14sp" android:textStyle="bold"

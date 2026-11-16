@@ -2,6 +2,8 @@ package com.gymlog.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.VibrationEffect;
@@ -15,6 +17,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.button.MaterialButton;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -27,7 +30,15 @@ public class MainActivity extends AppCompatActivity {
     static class Exercise {
         String name;
         int sets;
+        int target; // планирани серии (идват от шаблон); 0 = без цел
         Exercise(String name) { this.name = name; this.sets = 0; }
+    }
+
+    // Запазена тренировка ("любима"): упражненията в нея са с планиран брой серии в target
+    static class WorkoutTemplate {
+        String name;
+        List<Exercise> items = new ArrayList<>();
+        WorkoutTemplate(String name) { this.name = name; }
     }
 
     static class DayLog {
@@ -38,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
     // ── State ──
     private List<DayLog> allLogs = new ArrayList<>();
+    private List<WorkoutTemplate> templates = new ArrayList<>();
     private SharedPreferences prefs;
     private Gson gson = new Gson();
     private CountDownTimer restTimer;
@@ -65,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
         prefs = getSharedPreferences("gymlog", MODE_PRIVATE);
         loadData();
+        loadTemplates();
         loadSettings();
         bindViews();
         setupTabs();
@@ -122,6 +135,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Skip rest
         btnSkipRest.setOnClickListener(v -> stopRest());
+
+        // Templates
+        findViewById(R.id.btnTemplates).setOnClickListener(v -> showTemplatesDialog());
+        findViewById(R.id.btnSaveTemplate).setOnClickListener(v -> promptSaveTemplate());
 
         // Add exercise button
         findViewById(R.id.btnAdd).setOnClickListener(v -> addExercise());
@@ -214,6 +231,210 @@ public class MainActivity extends AppCompatActivity {
         boolean empty = getToday().exercises.isEmpty();
         tvEmptyToday.setVisibility(empty ? View.VISIBLE : View.GONE);
         rvExercises.setVisibility(empty ? View.GONE : View.VISIBLE);
+    }
+
+    // ── TEMPLATES (запазени тренировки) ──
+    private int dp(int v) {
+        return Math.round(v * getResources().getDisplayMetrics().density);
+    }
+
+    private WorkoutTemplate findTemplate(String name) {
+        for (WorkoutTemplate t : templates) {
+            if (t.name.equalsIgnoreCase(name)) return t;
+        }
+        return null;
+    }
+
+    // "ЗАПАЗИ": пита за име и записва днешните упражнения с броя серии като цел
+    private void promptSaveTemplate() {
+        if (getToday().exercises.isEmpty()) {
+            Toast.makeText(this, "Първо добави упражнения", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AlertDialog.Builder b = new AlertDialog.Builder(this);
+        final EditText et = new EditText(b.getContext());
+        et.setHint("Име, напр. Гърди и трицепс");
+        et.setSingleLine(true);
+        FrameLayout box = new FrameLayout(b.getContext());
+        box.setPadding(dp(20), dp(8), dp(20), 0);
+        box.addView(et);
+
+        b.setTitle("Запази като шаблон")
+         .setMessage("Запазват се днешните упражнения и броят серии.")
+         .setView(box)
+         .setPositiveButton("Запази", (d, w) -> {
+             String name = et.getText().toString().trim();
+             if (name.isEmpty()) name = "Тренировка " + (templates.size() + 1);
+             saveTemplateFromToday(name);
+         })
+         .setNegativeButton("Отказ", null)
+         .show();
+    }
+
+    private void saveTemplateFromToday(String name) {
+        final List<Exercise> items = new ArrayList<>();
+        for (Exercise ex : getToday().exercises) {
+            Exercise item = new Exercise(ex.name);
+            // направените серии стават цел; ако още няма серии, пази целта от стар шаблон
+            item.target = ex.sets > 0 ? ex.sets : ex.target;
+            items.add(item);
+        }
+
+        final WorkoutTemplate existing = findTemplate(name);
+        if (existing == null) {
+            WorkoutTemplate t = new WorkoutTemplate(name);
+            t.items = items;
+            templates.add(t);
+            saveTemplates();
+            Toast.makeText(this, "Шаблонът е запазен", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        new AlertDialog.Builder(this)
+            .setTitle("Шаблонът съществува")
+            .setMessage("„" + existing.name + "“ вече е запазен. Да се замени ли?")
+            .setPositiveButton("Замени", (d, w) -> {
+                existing.items = items;
+                saveTemplates();
+                Toast.makeText(this, "Шаблонът е обновен", Toast.LENGTH_SHORT).show();
+            })
+            .setNegativeButton("Отказ", null)
+            .show();
+    }
+
+    // "ШАБЛОНИ": списък със запазените тренировки (зареждане и изтриване)
+    private void showTemplatesDialog() {
+        AlertDialog dlg = new AlertDialog.Builder(this)
+            .setTitle("Шаблони")
+            .setNegativeButton("Затвори", null)
+            .create();
+
+        Context c = dlg.getContext();
+        ScrollView sv = new ScrollView(c);
+        LinearLayout list = new LinearLayout(c);
+        list.setOrientation(LinearLayout.VERTICAL);
+        list.setPadding(dp(20), dp(4), dp(20), dp(4));
+        sv.addView(list);
+        dlg.setView(sv);
+
+        renderTemplateList(list, dlg);
+        dlg.show();
+    }
+
+    private void renderTemplateList(LinearLayout list, AlertDialog dlg) {
+        list.removeAllViews();
+        Context c = list.getContext();
+
+        if (templates.isEmpty()) {
+            TextView tv = new TextView(c);
+            tv.setText("Още нямаш шаблони.\nДобави упражнения в „Днес“ и натисни „ЗАПАЗИ“.");
+            tv.setPadding(0, dp(16), 0, dp(16));
+            list.addView(tv);
+            return;
+        }
+
+        for (WorkoutTemplate t : new ArrayList<>(templates)) {
+            LinearLayout row = new LinearLayout(c);
+            row.setOrientation(LinearLayout.VERTICAL);
+            row.setPadding(0, dp(10), 0, dp(10));
+
+            TextView name = new TextView(c);
+            name.setText(t.name);
+            name.setTextSize(16);
+            name.setTypeface(null, Typeface.BOLD);
+            row.addView(name);
+
+            TextView sub = new TextView(c);
+            sub.setText(describeTemplate(t));
+            sub.setTextSize(12);
+            sub.setAlpha(0.65f);
+            row.addView(sub);
+
+            LinearLayout btns = new LinearLayout(c);
+            btns.setOrientation(LinearLayout.HORIZONTAL);
+            btns.setPadding(0, dp(8), 0, 0);
+
+            MaterialButton load = new MaterialButton(c);
+            load.setText("ЗАРЕДИ");
+            load.setOnClickListener(v -> { dlg.dismiss(); loadTemplate(t); });
+            LinearLayout.LayoutParams lpLoad = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lpLoad.setMarginEnd(dp(8));
+            btns.addView(load, lpLoad);
+
+            MaterialButton del = new MaterialButton(c, null,
+                com.google.android.material.R.attr.materialButtonOutlinedStyle);
+            del.setText("ИЗТРИЙ");
+            del.setTextColor(0xFFFF4757);
+            del.setStrokeColor(ColorStateList.valueOf(0xFFFF4757));
+            del.setOnClickListener(v -> confirmDeleteTemplate(t, list, dlg));
+            btns.addView(del);
+
+            row.addView(btns);
+            list.addView(row);
+        }
+    }
+
+    private String describeTemplate(WorkoutTemplate t) {
+        StringBuilder sb = new StringBuilder();
+        for (Exercise e : t.items) {
+            if (sb.length() > 0) sb.append(" · ");
+            sb.append(e.name);
+            if (e.target > 0) sb.append(" ×").append(e.target);
+        }
+        return sb.length() == 0 ? "Празен шаблон" : sb.toString();
+    }
+
+    private void confirmDeleteTemplate(WorkoutTemplate t, LinearLayout list, AlertDialog dlg) {
+        new AlertDialog.Builder(this)
+            .setTitle("Изтриване")
+            .setMessage("Изтриване на шаблона „" + t.name + "“?")
+            .setPositiveButton("Да", (d, w) -> {
+                templates.remove(t);
+                saveTemplates();
+                renderTemplateList(list, dlg);
+            })
+            .setNegativeButton("Отказ", null)
+            .show();
+    }
+
+    private void loadTemplate(WorkoutTemplate t) {
+        int have = getToday().exercises.size();
+        if (have == 0) {
+            applyTemplate(t, false);
+            return;
+        }
+        new AlertDialog.Builder(this)
+            .setTitle("Зареждане на „" + t.name + "“")
+            .setMessage("Днес вече има упражнения: " + have + ".\n„Замени“ ги изтрива заедно със серийте им.")
+            .setPositiveButton("Добави към тях", (d, w) -> applyTemplate(t, false))
+            .setNegativeButton("Замени", (d, w) -> applyTemplate(t, true))
+            .setNeutralButton("Отказ", null)
+            .show();
+    }
+
+    private void applyTemplate(WorkoutTemplate t, boolean replace) {
+        DayLog today = getToday();
+        if (replace) today.exercises.clear();
+
+        Set<String> have = new HashSet<>();
+        for (Exercise e : today.exercises) have.add(e.name.toLowerCase(Locale.ROOT));
+
+        int added = 0;
+        for (Exercise item : t.items) {
+            if (have.contains(item.name.toLowerCase(Locale.ROOT))) continue;
+            Exercise ex = new Exercise(item.name);
+            ex.target = item.target;
+            today.exercises.add(ex);
+            added++;
+        }
+
+        saveData();
+        adapter.notifyDataSetChanged();
+        renderSuggestions();
+        updateEmptyState();
+        Toast.makeText(this, "Заредени упражнения: " + added, Toast.LENGTH_SHORT).show();
     }
 
     // ── REST TIMER ──
@@ -407,7 +628,9 @@ public class MainActivity extends AppCompatActivity {
         @Override public void onBindViewHolder(VH h, int pos) {
             Exercise ex = getToday().exercises.get(pos);
             h.tvName.setText(ex.name);
-            h.tvCount.setText("Серии: " + ex.sets);
+            h.tvCount.setText(ex.target > 0
+                ? "Серии: " + ex.sets + " / " + ex.target
+                : "Серии: " + ex.sets);
 
             // Draw chips
             h.llChips.removeAllViews();
@@ -507,6 +730,38 @@ public class MainActivity extends AppCompatActivity {
             // Суровият текст се запазва в резервен ключ, за да не се губи безследно.
             prefs.edit().putString("logs_corrupt_backup", json).apply();
             allLogs = new ArrayList<>();
+        }
+    }
+
+    private void saveTemplates() {
+        prefs.edit().putString("templates", gson.toJson(templates)).apply();
+    }
+
+    private void loadTemplates() {
+        String json = prefs.getString("templates", null);
+        if (json == null) return;
+        try {
+            Type type = new TypeToken<List<WorkoutTemplate>>(){}.getType();
+            List<WorkoutTemplate> loaded = gson.fromJson(json, type);
+            List<WorkoutTemplate> clean = new ArrayList<>();
+            if (loaded != null) {
+                for (WorkoutTemplate t : loaded) {
+                    if (t == null || t.name == null) continue;
+                    List<Exercise> items = new ArrayList<>();
+                    if (t.items != null) {
+                        for (Exercise ex : t.items) {
+                            if (ex != null && ex.name != null) items.add(ex);
+                        }
+                    }
+                    t.items = items;
+                    clean.add(t);
+                }
+            }
+            templates = clean;
+        } catch (RuntimeException e) {
+            // Като при историята: повредени данни не сриват приложението, а се пазят в резервен ключ
+            prefs.edit().putString("templates_corrupt_backup", json).apply();
+            templates = new ArrayList<>();
         }
     }
 
